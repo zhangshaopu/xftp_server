@@ -1,14 +1,15 @@
 ﻿#include <event2/event.h>
 #include <event2/listener.h>
 #include <string.h>
+#include <iostream>
 
 #include "XThreadPool.h"
-#include "XFtpServerCMD.h"
+#include "XFtpFactory.h"
 
 #ifndef _WIN32
 #include <signal.h>
 #endif
-#include <iostream>
+
 using namespace std;
 #define SPORT 5001
 
@@ -18,7 +19,7 @@ void listen_cb(struct evconnlistener* ev, evutil_socket_t socket, struct sockadd
 	cout << "listen_cb 被调用" << endl;
 	
 	//当有一个客户端连接 证明接下来会有cmd任务,创建一个task变量接受它
-	XTask *task = new XFtpServerCMD();
+	XTask *task = XFtpFactory::Get()->CreateTask(); // 创建一个工厂生产出这样一个任务
 	task->sock = socket;
 
 	// 向线程池中线程分发任务：往线程中添加任务 激活该线程

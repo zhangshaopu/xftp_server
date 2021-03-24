@@ -1,12 +1,13 @@
 #pragma once
-#include "XTask.h"
-class XFtpServerCMD :
-    public XTask
+#include "XFtpTask.h"
+class XFtpServerCMD :public XFtpTask
 {
 public:
     //初始化任务 虚函数
     virtual bool Init();
 
+    virtual void Read(struct bufferevent* bev);
+    virtual void Event(struct bufferevent* bev, short what);
 
 };
 

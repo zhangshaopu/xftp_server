@@ -18,7 +18,7 @@ void XThreadPool::Init(int ThreadCount)
 		this->threads.push_back(t);
 
 		//因为new XThread()是并发执行 当前线程休眠一段时间
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 }
 
