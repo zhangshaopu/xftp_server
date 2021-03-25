@@ -22,6 +22,7 @@ void XThread::Notify(evutil_socket_t fd, short which)
 	int re = recv(fd, buf, 1, 0);
 #else
 	//linux中是管道，不能用recv
+	//从fd[0]中读一个字节到buf
 	int re = read(fd, buf, 1);
 #endif
 	if (re <= 0)
@@ -30,7 +31,7 @@ void XThread::Notify(evutil_socket_t fd, short which)
 
 	XTask* task = NULL;
 
-	//获取任务，并初始化任务
+	//如果该线程的任务队列不为空，获取任务，并初始化任务
 	tasks_mutex.lock();
 	if (tasks.empty())
 	{
@@ -49,6 +50,7 @@ void XThread::Activate()
 #ifdef _WIN32
 	int re = send(this->notify_send_fd, "c", 1, 0);
 #else
+	// 往fd[0]写入1个字符 'c'，表示接受到任务
 	int re = write(this->notify_send_fd, "c", 1);
 #endif
 	if (re <= 0)
@@ -59,6 +61,7 @@ void XThread::Activate()
 
 void XThread::AddTask(XTask *t)
 {
+	cout << " add task to this thread's task_list " << endl;
 	if (!t)return;
 	t->base = this->base;
 	//任务队列互斥访问
@@ -118,6 +121,7 @@ bool XThread::Setup()
 	}
 
 	//添加管道监听事件，用于激活线程执行任务
+	// 只要fd[0]接受到消息 调用NotifyCB
 	event* ev = event_new(this->base, fds[0], EV_READ | EV_PERSIST, NotifyCB, this);
 	
 	event_add(ev, 0);

@@ -29,11 +29,12 @@ void XThreadPool::Dispatch(XTask* task)
 	// task 0x621d30 地址
 	int tid = (lastThread + 1) % ThreadCount;
 	lastThread = tid;
-	XThread* t = threads[tid];
+	//找到一个可以处理该任务的线程 将任务添加给该线程的任务队列
+	XThread* thr = threads[tid];
 
-	t->AddTask(task);
+	thr->AddTask(task);
 
 	//激活线程
-	t->Activate();
+	thr->Activate();
 
 }
