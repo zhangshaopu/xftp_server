@@ -59,13 +59,17 @@ void XFtpTask::Close()
 		bufferevent_free(bev);
 		bev = 0;
 	}
+	if (fp) {
+		fclose(fp);
+		fp = 0;
+	}
 }
 
 void XFtpTask::SetCallback(bufferevent* bev)
 {
 	//为了让bufferevent自动帮我们管理缓冲区，还有一个条件，
 	//那就是要开启它的读功能和写功能
-	bufferevent_setcb(bev, ReadCB, WriteCB, EventCB, this);
+	bufferevent_setcb(bev, ReadCB, WriteCB, EventCB, this); // 
 	bufferevent_enable(bev, EV_READ | EV_WRITE);
 }
 

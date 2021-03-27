@@ -46,6 +46,6 @@ protected: // 继承者可以访问
 
 	// 命令bev 每个指令包含一个bev
 	struct bufferevent* bev = 0;
-
+	FILE* fp = 0;
 };
 

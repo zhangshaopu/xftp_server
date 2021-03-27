@@ -53,12 +53,17 @@ bool XFtpServerCMD::Init()
 	//如果 socket 可读，bufferevent会自动读取 socket 中的数据，并放到输入缓冲区中。
 	//如果 socket 可写，bufferevent会自动将输出缓冲区中的数据写到 socket 中。
 	bufferevent* bev = bufferevent_socket_new(base, sock, BEV_OPT_CLOSE_ON_FREE);
+	if (!bev) {
+		delete this;
+		return false;
+	}
+
 	this->bev = bev;
 
 	this->SetCallback(bev);
 
 	//添加超时
-	timeval rt = { 60,0 }; // 秒和微秒
+	timeval rt = { 3000,0 }; // 秒和微秒
 	bufferevent_set_timeouts(bev, &rt, 0);
 
 	string msg = "220 Welcome to libevent XFtpServer\r\n";
@@ -87,7 +92,8 @@ void XFtpServerCMD::Read(bufferevent* bev)
 			type += data[i];
 		}
 		cout << "type is [" << type << "]" << endl;
-		if (calls.find(type) != calls.end())
+		// map.end()指向最后一个元素的下一位 即如果不越界，处理该命令
+		if (calls.find(type) != calls.end()) 
 		{
 			XFtpTask* t = calls[type];
 			t->cmdTask = this; //用来处理回复命令和目录
@@ -95,8 +101,9 @@ void XFtpServerCMD::Read(bufferevent* bev)
 			t->ip = ip;
 			t->port = port;
 			t->base = base;
-
+			
 			t->Parse(type, data);
+			
 
 			if (type == "PORT")
 			{
@@ -119,7 +126,7 @@ void XFtpServerCMD::Event(bufferevent* bev, short what)
 	if (what & (BEV_EVENT_EOF | BEV_EVENT_ERROR | BEV_EVENT_TIMEOUT))
 	{
 		cout << "BEV_EVENT_EOF | BEV_EVENT_ERROR |BEV_EVENT_TIMEOUT" << endl;
-		bufferevent_free(bev);
+		//bufferevent_free(bev);
 		delete this;
 	}
 }
@@ -143,4 +150,16 @@ void XFtpServerCMD::Reg(std::string cmd, XFtpTask* call)
 		return;
 	}
 	calls[cmd] = call;
+	//用来做空间清理
+	calls_dell[call] = 0;
+}
+
+XFtpServerCMD::~XFtpServerCMD()
+{
+	Close();
+	for (auto ptr = calls_dell.begin(); ptr != calls_dell.end(); ptr++) {
+		ptr->first->Close();
+		delete ptr->first;
+
+	}
 }

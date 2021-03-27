@@ -4,6 +4,8 @@
 #include "XFtpLIST.h"
 #include "XFtpPORT.h"
 #include <iostream>
+#include "XFtpRETR.h"
+#include "XFtpSTOR.h"
 using namespace std;
 XTask* XFtpFactory::CreateTask()
 {
@@ -15,8 +17,11 @@ XTask* XFtpFactory::CreateTask()
 	XFtpLIST* list = new XFtpLIST();
 	x->Reg("PWD", list);
 	x->Reg("LIST", list);
+	x->Reg("CWD", list);
+	x->Reg("CDUP", list);
 	x->Reg("PORT", new XFtpPORT());
-
+	x->Reg("RETR", new XFtpRETR());
+	x->Reg("STOR", new XFtpSTOR());
 	return x;
 }
 
